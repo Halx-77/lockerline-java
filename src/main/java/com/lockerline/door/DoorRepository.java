@@ -44,15 +44,20 @@ public class DoorRepository {
                 .params(towerId, size.name()).query(Row.class).optional();
     }
 
-    /*The sizes that still have at least one free door, in the order S, M, L.*/
+    /** The sizes that still have at least one free door, in the order S, M, L. */
     public List<SizeClass> freeSizes(long towerId) {
         return jdbc.sql("SELECT DISTINCT size_class FROM doors WHERE tower_id = ? AND current_parcel_id IS NULL")
                 .param(towerId).query(SizeClass.class).list().stream().sorted().toList();
     }
 
     /** Puts a parcel in a door. */
-    public void hold(long doorId, long parcelId){
+    public void hold(long doorId, long parcelId) {
         jdbc.sql("UPDATE doors SET current_parcel_id = ? WHERE id = ?").params(parcelId, doorId).update();
+    }
+
+    /** Empties a door. */
+    public void free(long doorId) {
+        jdbc.sql("UPDATE doors SET current_parcel_id = NULL WHERE id = ?").param(doorId).update();
     }
 
     public void insert(long towerId, String no, SizeClass sizeClass) {
